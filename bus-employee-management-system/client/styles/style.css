@@ -1,0 +1,350 @@
+/* Reset */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto; /* Ensure vertical scrolling for the whole page */
+  }
+  
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+  
+  body {
+    font-family: 'Cooper Hewitt', 'Segoe UI', sans-serif;
+    background-color: #f0f0f0;
+  }
+  
+  /* Layout Wrapper */
+  .app-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    width: 400px;
+    background-color: #F8F8F8;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: width 0.3s ease;
+    flex-shrink: 0;
+    position: relative;
+    /* Important for toggle button positioning */
+  }
+  
+  .sidebar.collapsed {
+    width: 80px;
+  }
+  
+  .sidebar.collapsed .nav-text,
+  .sidebar.collapsed .sub-menu {
+    display: none;
+  }
+  
+  .sidebar.collapsed .logo img {
+    width: 50px;
+    margin: auto;
+    display: block;
+  }
+  
+  .sidebar.collapsed .nav-item,
+  .sidebar.collapsed .logout a {
+    justify-content: center;
+  }
+  
+  /* Toggle Button inside Sidebar */
+  .toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: -20px; /* Half width of the button to overlap nicely */
+    transform: translateY(-50%);
+    background-color: #7e1b1b;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    cursor: pointer;
+    font-size: 20px;
+    border: 2px solid white;
+    z-index: 10;
+    transition: background 0.3s;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .toggle-btn:hover {
+    background-color: #a63d3d;
+  }
+  
+  /* Layout Right */
+  .layout-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 400px);
+    transition: width 0.3s ease;
+  }
+  
+  .sidebar.collapsed + .layout-right {
+    width: calc(100% - 80px);
+  }
+  
+  /* Content */
+  .layout-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto; /* Allow content to scroll */
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+    width: 100%;
+    height: auto; /*Allow the content to expand*/
+    min-height: 0;
+  }
+  
+  /* Fixed Center Box */
+  .center-box {
+    width: 1400px;
+    background-color: orange;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid rgb(218, 213, 213);
+    border-radius: 10px;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px;
+    /* Ensure the center-box doesn't constrain scroll */
+    max-height: 100%;
+    overflow: visible; /* Make sure this doesn't interfere with page scroll */
+  }
+  
+  /* Logo */
+  .logo {
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .logo img {
+    width: 250px;
+    border-radius: 50%;
+    max-width: 100%;
+  }
+  
+  /* Nav Items */
+  .nav-links {
+    flex: 1;
+    padding: 0.5rem;
+  }
+  
+  .nav-icon {
+    width: 30px;
+    margin-right: 5px;
+  }
+  
+  .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    margin: 0.3rem 0;
+    color: black;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 20px;
+    font-family: sans-serif;
+    font-weight: 100;
+    transition: background-color 0.3s;
+  }
+  
+  .nav-item:hover {
+    background-color: #f1d18a;
+  }
+  
+  .nav-item.active {
+    background-color: rgba(254, 183, 31, 0.15);
+    color: #9F0F19;
+    font-weight: 600;
+  }
+  
+  .nav-item:hover::before,
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 5px;
+    border-radius: 5px 0 0 5px;
+  }
+  
+  .nav-item:hover::before {
+    background-color: #FEB71F;
+  }
+  
+  .nav-item.active::before {
+    background-color: #9F0F19;
+  }
+  
+  /* Submenu */
+  .sub-menu {
+    display: none;
+    padding-left: 2rem;
+    margin-top: 0.3rem;
+  }
+  
+  .sub-menu.active {
+    display: block;
+  }
+  
+  .sub-item {
+    display: block;
+    padding: 0.5rem;
+    margin: 0.2rem 0;
+    font-size: 20px;
+    color: white;
+    background-color: #a63d3d;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: 'Cooper Hewitt', sans-serif;
+    transition: background-color 0.3s;
+  }
+  
+  .sub-item:hover {
+    background-color: #FEB71F;
+  }
+  
+  .sub-item.active {
+    background-color: #FEB71F;
+    color: #9F0F19;
+    font-weight: 600;
+  }
+  
+  /* Logout */
+  .logout {
+    padding: 1rem;
+  }
+  
+  .logout a {
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    font-family: 'Cooper Hewitt', sans-serif;
+  }
+  
+  .logout a:hover {
+    background-color: rgb(87, 62, 62);
+  }
+  
+  .logout i {
+    margin-right: 10px;
+  }
+  
+  /* Top Bar */
+  .top-bar {
+    background-color: #fff;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .top-links {
+    display: flex;
+    justify-content: center;
+    gap: 9rem;
+    position: relative;
+    flex-wrap: wrap;
+  }
+  
+  .top-link {
+    position: relative;
+    color: black;
+    text-decoration: none;
+    font-weight: 100;
+    font-size: 24px;
+    font-family: sans-serif;
+    padding: 0.7rem 0;
+    transition: color 0.3s;
+  }
+  
+  .top-link:hover {
+    color: #FFB71F;
+  }
+  
+  .top-link.active {
+    color: #9F0F19;
+    font-weight: 550;
+  }
+  
+  .link-underline {
+    position: absolute;
+    bottom: 0;
+    height: 4px;
+    background-color: #9F0F19;
+    transition: left 0.3s ease, width 0.3s ease;
+    border-radius: 2px;
+  }
+  
+  /* Typography */
+  h1 {
+    font-size: 48px;
+    font-weight: 800;
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+  }
+  
+  h3 {
+    font-size: 10px;
+    font-weight: 600;
+  }
+  
+  h4 {
+    font-size: 24px;
+    font-weight: 500;
+  }
+  
+  h5 {
+    font-size: 20px;
+    font-weight: 500;
+  }
+  
+  h6 {
+    font-size: 16px;
+    font-weight: 400;
+  }
+  
+  p, .label, input, button {
+    font-size: 16px;
+    font-weight: 400;
+    font-family: 'Cooper Hewitt', sans-serif;
+  }
+  
+  .label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  small {
+    font-size: 12px;
+  }

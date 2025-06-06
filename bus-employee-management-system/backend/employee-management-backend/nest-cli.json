@@ -1,0 +1,25 @@
+{
+  "monorepo": true,
+  "root": "apps",
+  "sourceRoot": "apps",
+  "projects": {
+    "auth-ms": {
+      "type": "application",
+      "root": "apps/auth-ms",
+      "entryFile": "main",
+      "sourceRoot": "apps/auth-ms/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/auth-ms/tsconfig.app.json"
+      }
+    },
+    "gateway": {
+      "type": "application",
+      "root": "apps/gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway/tsconfig.app.json"
+      }
+    }
+  }
+}

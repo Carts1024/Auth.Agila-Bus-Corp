@@ -1,0 +1,39 @@
+/* ----- PAGINATION STYLING ----- */
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    padding-bottom: 15px;
+    font-size: 14px;
+}
+
+.page-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    color: var(--primary-text-color);
+    transition: all 0.3s ease-in-out;
+}
+
+.page-btn i {
+    font-size: 20px;
+}
+
+.page-btn:hover {
+    background-color: var(--table-row-color);
+}
+
+.page-btn.active {
+    background-color: var(--primary-color);
+    color: var(--foreground-color);
+    font-weight: bold;
+}
+
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}

@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  users User[]
+}
+
+model SecurityQuestion {
+  id        Int      @id @default(autoincrement())
+  question  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  users User[]
+}
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  employeeId         String    @unique
+  email              String    @unique
+  password           String
+  firstName          String
+  lastName           String
+  birthdate          DateTime
+  roleId             Int // Foreign key to Role model
+  mustChangePassword Boolean   @default(true) // Indicates if the user must change their password on next login
+  phone              String? // Optional phone number
+  streetAddress      String? // Optional street address
+  barangay           String? // Optional barangay
+  city               String? // Optional city
+  province           String? // Optional province
+  zipCode            String? // Optional zip code
+  country            String? // Optional country
+  securityQuestionId Int // Optional security question
+  securityAnswer     String // Optional security answer with arghon2 hashing
+  resetToken         String? // Reset Password Token
+  resetTokenExpiry   DateTime? // Token Expiry
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  //Relationships
+  role             Role              @relation(fields: [roleId], references: [id])
+  securityQuestion SecurityQuestion? @relation(fields: [securityQuestionId], references: [id])
+  auditLogs        AuditLog[]
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  action    String // Action performed (e.g., 'create', 'update', 'delete')
+  timestamp DateTime @default(now())
+  ipAddress String? // IP address of the user performing the action
+  details   String? // Additional details about the action
+}
