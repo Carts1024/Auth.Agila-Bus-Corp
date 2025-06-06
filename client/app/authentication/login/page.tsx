@@ -96,7 +96,7 @@ export default function LoginPage() {
           Inventory: process.env.NEXT_PUBLIC_REDIRECT_INVENTORY!,
           Operations: process.env.NEXT_PUBLIC_REDIRECT_OPERATIONS!,
         };
-        const redirectUrl = redirectMap[role] || 'https://ems-v1-delta.vercel.app';
+        const redirectUrl = redirectMap[role] || 'https://ems.agilabuscorp.me';
         window.location.href = redirectUrl;
       } else if (response.status === 403) {
         router.push(
