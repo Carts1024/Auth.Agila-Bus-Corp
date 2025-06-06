@@ -77,13 +77,26 @@ export default function LoginPage() {
       return;
     }
 
+    // try {
+    //   const response = await fetch('/api/auth/login', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(formData),
+    //     credentials: 'include',
+    //   });
+
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+    console.log('Using API base:', API_BASE_URL);
     try {
-      const response = await fetch('/api/auth/login', {
+      
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(formData),
         credentials: 'include',
-      });
+      });    
 
       const data = await response.json();
       if (response.ok) {
