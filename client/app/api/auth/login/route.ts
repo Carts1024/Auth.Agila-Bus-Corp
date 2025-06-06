@@ -31,17 +31,17 @@ export async function POST(request: NextRequest) {
     token = undefined;
   }
 
-  // Set JWT as HTTP-only cookie for all subdomains if present
-  if (token) {
-    response.cookies.set('jwt', token, {
-      httpOnly: true,
-      secure: true,
-      path: '/',
-      sameSite: 'lax', // or 'none' if needed for cross-site
-      domain: '.agilabuscorp.me', // Makes cookie available to all subdomains
-      maxAge: 60 * 60 * 24, // 1 day
-    });
-  }
+  // // Set JWT as HTTP-only cookie for all subdomains if present
+  // if (token) {
+  //   response.cookies.set('jwt', token, {
+  //     httpOnly: true,
+  //     secure: true,
+  //     path: '/',
+  //     sameSite: 'lax', // or 'none' if needed for cross-site
+  //     domain: '.agilabuscorp.me', // Makes cookie available to all subdomains
+  //     maxAge: 60 * 60 * 24, // 1 day
+  //   });
+  // }
 
   // Forward ALL cookie headers from gateway (optional, if needed)
   const cookies = gatewayRes.headers.getSetCookie();
