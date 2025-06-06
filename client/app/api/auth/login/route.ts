@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   // Set JWT as HTTP-only cookie for all subdomains if present
   if (token) {
-    response.cookies.set('token', token, {
+    response.cookies.set('jwt', token, {
       httpOnly: true,
       secure: true,
       path: '/',
