@@ -31,7 +31,7 @@ export class AuthService{
 
   }
 
-    async getRole(user:any) {
+  async getRole(user:any) {
     try {
       const role = await prisma.role.findUnique({
         where: { id: user.roleId },
