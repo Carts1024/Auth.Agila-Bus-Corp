@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     logout();
-    // No need to fetch roles anymore
+
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,12 +91,14 @@ export default function LoginPage() {
         const role = data.role;
         // Redirect map (from .env)
         const redirectMap: Record<string, string> = {
-          HR: process.env.NEXT_PUBLIC_REDIRECT_HR!,
-          Finance: process.env.NEXT_PUBLIC_REDIRECT_FINANCE!,
-          Inventory: process.env.NEXT_PUBLIC_REDIRECT_INVENTORY!,
-          Operations: process.env.NEXT_PUBLIC_REDIRECT_OPERATIONS!,
+          'Admin': process.env.NEXT_PUBLIC_REDIRECT_HR!,
+          'HR Manager': process.env.NEXT_PUBLIC_REDIRECT_HR!,
+          'Accountant': process.env.NEXT_PUBLIC_REDIRECT_FINANCE!,
+          'Inventory Manager': process.env.NEXT_PUBLIC_REDIRECT_INVENTORY!,
+          'Operations Manager': process.env.NEXT_PUBLIC_REDIRECT_OPERATIONS!,
+          'Dispatcher': process.env.NEXT_PUBLIC_REDIRECT_OPERATIONS!,
         };
-        const redirectUrl = redirectMap[role] || 'https://ems.agilabuscorp.me';
+        const redirectUrl = redirectMap[role] || 'https://auth.agilabuscorp.me';
         window.location.href = redirectUrl;
       } else if (response.status === 403) {
         router.push(

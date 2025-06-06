@@ -38,8 +38,11 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    const { access_token,role } = this.authService.login(user);
+    const role = await this.authService.getRole(user); // Fetch user roles.
+    if (!role) {
+      throw new BadRequestException('Role not found for user');
+    }
+    const { access_token} = this.authService.login(user);
 
     // Set the access token as an HTTP-only cookie for security.
     res.cookie('jwt', access_token, {
@@ -49,7 +52,7 @@ export class AuthController {
       path: '/',
       maxAge: 3600 * 1000,
     });
-    return { message: 'Login successful', token: access_token,role};
+    return { message: 'Login successful', token: access_token, role: role.name }; // Return success message and user role.
   }
 
   /**

@@ -31,12 +31,25 @@ export class AuthService{
 
   }
 
+    async getRole(user:any) {
+    try {
+      const role = await prisma.role.findUnique({
+        where: { id: user.roleId },
+        select: { name: true },
+
+      });
+      return role;
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      throw new Error('Failed to fetch roles');
+    }
+  }
 
   login(user: any) {
+
     const payload = { employeeId: user.employeeId, sub: user.id};
     return {
       access_token: this.jwtService.sign(payload),
-      role: user.roleId
     };
   }
 }
