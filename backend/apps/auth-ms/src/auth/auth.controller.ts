@@ -16,17 +16,22 @@ import { addMinutes } from 'date-fns';
 import { EmailService } from '../email/email.service';
 import { generateRandomPassword } from '../utils/generators';
 import { JwtService } from '@nestjs/jwt';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 // Initialize a single instance of PrismaClient.
 const prisma = new PrismaClient(); // <-- Only need one Prisma client
 
 @Controller('auth')
 export class AuthController {
+  private HR_SERVICE_URL = process.env.HR_SERVICE_URL || 'http://localhost:4002';
   // Inject necessary services.
   constructor(
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
     private readonly jwtService: JwtService, // Inject JwtService for JWT operations.
+    private readonly httpService: HttpService,
+    
   ) {}
 
   /**
@@ -36,28 +41,46 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response, @Req() req: Request) {
-    // Validate the user's role, employeeID, and password.
-    const user = await this.authService.validateUser(loginDto.employeeId, loginDto.password);
+
+    // Step 1: Get employee by employeeNumber from HR Service
+    let employee;
+    try {
+      const hrRes = await firstValueFrom(
+        this.httpService.get(`${this.HR_SERVICE_URL}/employees/by-number/${loginDto.employeeNumber}`)
+      );
+      employee = hrRes.data;
+    } catch (err) {
+      throw new UnauthorizedException('Invalid employee number or password');
+    }
+
+    // if (!employee?.id) {
+    //   throw new UnauthorizedException('Invalid employee number or password no');
+    // }
+
+    // Step 2: Validate the user by employeeId and password
+    // Use employee.id, not employee.number!
+
+    const user = await this.authService.validateUser(employee.id, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const role = await this.authService.getRole(user); // Fetch user roles.
+    const role = await this.authService.getRole(user);
     if (!role) {
       throw new BadRequestException('Role not found for user');
     }
-    const { access_token} = this.authService.login(user);
+    const { access_token } = this.authService.login(user);
 
     // Set the access token as an HTTP-only cookie for security.
     res.cookie('jwt', access_token, {
       httpOnly: true,
       secure: true, // Always true in production (HTTPS)
-      sameSite: 'lax', // Required for cross-site cookies
-      domain: '.agilabuscorp.me', 
+      sameSite: 'lax',
       path: '/',
       maxAge: 3600 * 1000,
     });
-    return { message: 'Login successful', token: access_token, role: role.name }; // Return success message and user role.
+    return { message: 'Login successful', token: access_token, role: role.name };
   }
+
 
   /**
    * Handles jwt verfication.
@@ -83,52 +106,131 @@ export class AuthController {
    * Handles new user registration.
    * Checks for existing users, hashes the password, stores the new user, and sends a welcome email.
    */
+  // @Post('register')
+  // @HttpCode(HttpStatus.CREATED)
+  // async register(@Body() body: {
+  //   employeeId: string;
+  //   roleId: number;
+  //   email: string,
+  //   birthdate: Date,
+  //   firstName: string,
+  //   lastName: string,
+  //   phone?: string,
+  //   streetAddress?: string,
+  //   city?: string,
+  //   province?: string,
+  //   zipCode?: string,
+  //   country?: string,
+  //   securityQuestionId: number,
+  //   securityAnswer: string;
+  // }) {
+  //   const { employeeId, roleId, email, birthdate, firstName, lastName, phone, streetAddress, city, province, zipCode, country, securityQuestionId, securityAnswer } = body;
+
+  //   // Check if a user with the given employeeId already exists.
+  //   const existing = await prisma.user.findUnique({ where: { employeeId } });
+  //   if (existing) {
+  //     throw new BadRequestException('User already exists');
+  //   }
+
+  //   const tempPassword = generateRandomPassword(); // Generate a temporary random password.
+  //   const passwordhash = await argon2.hash(tempPassword, { type: argon2.argon2id }); // Hash the password.
+  //   const securityAns = body.securityAnswer ?? '';
+  //   const AnswerHash = await argon2.hash(securityAns, { type: argon2.argon2id }); // Hash the security answer.
+
+  //   const user = await prisma.user.create({
+  //     data: { employeeId, roleId, password: passwordhash, email, securityQuestionId, securityAnswer: AnswerHash },
+  //   });
+
+  //   await this.emailService.sendWelcomeEmail(user.email, user.employeeId, tempPassword, firstName); // Send welcome email with temporary password.
+
+  //   return {
+  //     message: 'User registered successfully', user: {
+  //       id: user.id,
+  //       employeeID: user.employeeId,
+  //       role: user.roleId,
+  //       email: user.email,
+  //       securityQuestion: user.securityQuestionId,
+  //       securityAnswerHash: user.securityAnswer, // Note: This returns the hash
+  //       message: 'User Registered. Email Sent'
+  //     }
+  //   };
+  // }
+
+
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() body: {
-    employeeId: string;
-    roleId: number;
+    employeeId: string,            // Employee PK (cuid)
+    roleId: number,
     email: string,
-    birthdate: Date,
-    firstName: string,
-    lastName: string,
-    phone?: string,
-    streetAddress?: string,
-    city?: string,
-    province?: string,
-    zipCode?: string,
-    country?: string,
     securityQuestionId: number,
-    securityAnswer: string;
+    securityAnswer: string,
+    firstName: string, // For welcome email
   }) {
-    const { employeeId, roleId, email, birthdate, firstName, lastName, phone, streetAddress, city, province, zipCode, country, securityQuestionId, securityAnswer } = body;
+    const { employeeId, roleId, email, securityQuestionId, securityAnswer, firstName } = body;
 
-    // Check if a user with the given employeeId already exists.
-    const existing = await prisma.user.findUnique({ where: { employeeId } });
-    if (existing) {
-      throw new BadRequestException('User already exists');
+    // 1. Check for existing user with this employeeId or email
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { employeeId },
+          { email }
+        ]
+      }
+    });
+    if (existingUser) {
+      throw new BadRequestException('User already exists for this employee or email');
     }
 
-    const tempPassword = generateRandomPassword(); // Generate a temporary random password.
-    const passwordhash = await argon2.hash(tempPassword, { type: argon2.argon2id }); // Hash the password.
-    const securityAns = body.securityAnswer ?? '';
-    const AnswerHash = await argon2.hash(securityAns, { type: argon2.argon2id }); // Hash the security answer.
+    // 2. Generate and hash temporary password
+    const tempPassword = generateRandomPassword();
+    const passwordHash = await argon2.hash(tempPassword, { type: argon2.argon2id });
+    const securityAnswerHash = await argon2.hash(securityAnswer ?? '', { type: argon2.argon2id });
 
+    // 3. Create user record
     const user = await prisma.user.create({
-      data: { employeeId, roleId, password: passwordhash, email, securityQuestionId, securityAnswer: AnswerHash },
+      data: {
+        employeeId,
+        roleId,
+        email,
+        password: passwordHash,
+        mustChangePassword: true,
+        securityQuestionId,
+        securityAnswer: securityAnswerHash,
+        status: "active",
+      }
     });
 
-    await this.emailService.sendWelcomeEmail(user.email, user.employeeId, tempPassword, firstName); // Send welcome email with temporary password.
+    // 4. Fetch employeeNumber from HR service using employeeId
+    let employeeNumber = '';
+    try {
+      const url = `${process.env.HR_SERVICE_URL}/employees/${employeeId}`;
+      console.log('Requesting HR:', url);
+      const hrRes = await firstValueFrom(
+        this.httpService.get(url)
+      );
+      console.log('HR employee lookup response:', hrRes.data);
+      employeeNumber = hrRes.data?.employeeNumber || '[Unknown]';
+    } catch (e) {
+      console.error('Error fetching employeeNumber:', e);
+      employeeNumber = '[Unknown]';
+    }
+
+    console.log('Sending welcome email with:', {
+      email, employeeNumber, tempPassword, firstName
+    });
+    // 5. Send welcome email with employeeNumber
+    await this.emailService.sendWelcomeEmail(email, employeeNumber, tempPassword, firstName);
 
     return {
-      message: 'User registered successfully', user: {
+      message: 'User registered successfully',
+      user: {
         id: user.id,
-        employeeID: user.employeeId,
-        role: user.roleId,
+        employeeId: user.employeeId,
         email: user.email,
-        securityQuestion: user.securityQuestionId,
-        securityAnswerHash: user.securityAnswer, // Note: This returns the hash
-        message: 'User Registered. Email Sent'
+        roleId: user.roleId,
+        mustChangePassword: user.mustChangePassword,
+        status: user.status,
       }
     };
   }
@@ -222,29 +324,49 @@ export class AuthController {
    */
   @Post('first-password-reset')
   @HttpCode(HttpStatus.OK)
-  async firstPasswordReset(@Body() body: { employeeId: string; newPassword: string }) {
+  async firstPasswordReset(
+    @Body() body: { employeeNumber: string; newPassword: string }
+  ) {
+    // 1. Lookup the employee by number (HR Service)
+    let employeeId: string | undefined;
+    try {
+      const hrRes = await firstValueFrom(
+        this.httpService.get(`${process.env.HR_SERVICE_URL}/employees/by-number/${body.employeeNumber}`)
+      );
+      employeeId = hrRes.data.id;
+    } catch {
+      throw new BadRequestException('Invalid employee number');
+    }
+
+    if (!employeeId) {
+      throw new BadRequestException('Employee not found');
+    }
+
+    // 2. Find the user in Auth DB
     const user = await prisma.user.findUnique({
-      where: { employeeId: body.employeeId },
+      where: { employeeId },
     });
     if (!user) {
       throw new BadRequestException('No such user');
     }
 
-    if (!user.mustChangePassword) { // Check if a password change is actually required.
+    if (!user.mustChangePassword) {
       throw new BadRequestException('Password reset not required or already completed');
     }
 
+    // 3. Hash and update password
     const hash = await argon2.hash(body.newPassword, { type: argon2.argon2id });
     await prisma.user.update({
-      where: { employeeId: body.employeeId },
+      where: { employeeId },
       data: {
         password: hash,
-        mustChangePassword: false, // Mark that the initial password reset is done.
+        mustChangePassword: false,
       },
     });
 
     return { message: 'Password reset successfully' };
   }
+
 
   /**
    * Handles user logout.

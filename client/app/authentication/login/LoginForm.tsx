@@ -6,11 +6,11 @@ import styles from "./login.module.css";
 
 interface LoginFormProps {
   formData: {
-    employeeId: string;
+    employeeNumber: string;    // <-- changed from employeeId
     password: string;
   };
   errors: {
-    employeeId: string;
+    employeeNumber: string;    // <-- changed from employeeId
     password: string;
     general: string;
   };
@@ -49,22 +49,22 @@ export default function LoginForm({
               {errors.general}
             </div>
           )}
-          <label htmlFor="employeeId" className={styles.label}>
-            Employee ID
+          <label htmlFor="employeeNumber" className={styles.label}>
+            Employee Number
           </label>
           <input
             type="text"
-            id="employeeId"
-            name="employeeId"
-            value={formData.employeeId}
+            id="employeeNumber"
+            name="employeeNumber"
+            value={formData.employeeNumber}
             onChange={handleChange}
-            placeholder="Employee Id here..."
+            placeholder="Employee Number here..."
             required
-            className={`${styles.input} ${errors.employeeId ? styles.inputError : ''}`}
+            className={`${styles.input} ${errors.employeeNumber ? styles.inputError : ''}`}
           />
-          {errors.employeeId && (
+          {errors.employeeNumber && (
             <p className={styles.errorText}>
-              {errors.employeeId}
+              {errors.employeeNumber}
             </p>
           )}
           <label htmlFor="password" className={styles.label}>

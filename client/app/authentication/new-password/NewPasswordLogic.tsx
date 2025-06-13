@@ -15,7 +15,7 @@ export function useNewPasswordLogic() {
   const searchParams = useSearchParams();
 
   const token = searchParams.get('token');
-  const employeeId = searchParams.get('employeeID');
+  const employeeNumber = searchParams.get('employeeNumber');
 
   const validateForm = () => {
     let isValid = true;
@@ -53,7 +53,7 @@ export function useNewPasswordLogic() {
 
       const payload = token
         ? { token, newPassword }
-        : { employeeId, newPassword };
+        : { employeeNumber, newPassword };
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,

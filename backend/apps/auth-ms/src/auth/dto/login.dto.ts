@@ -5,7 +5,7 @@ export class LoginDto {
 
   @IsString()
   @IsNotEmpty()
-  employeeId: string;
+  employeeNumber: string;
 
   @IsString()
   @IsNotEmpty()

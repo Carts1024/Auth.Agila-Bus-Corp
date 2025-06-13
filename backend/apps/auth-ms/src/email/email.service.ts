@@ -34,13 +34,13 @@ export class EmailService {
         });
     }
 
-    async sendWelcomeEmail(to: string, employeeId: string, password: string, firstName: string) {
+    async sendWelcomeEmail(to: string, employeeNumber: string, password: string, firstName: string) {
         await this.transporter.sendMail({
             from: `"Agila Bus Transport Corporation" <${process.env.STMP_USER}>`, // sender address
             to, 
             subject: 'Welcome to Agila Bus Transport Corporation', // Subject line
             html: `<p>Welcome to Agila Bus Transport Corporation <strong>${firstName}</strong>!</p>
-                   <p>Your Employee ID is: <strong>${employeeId}</strong></p>
+                   <p>Your Employee ID is: <strong>${employeeNumber}</strong></p>
                    <p>Your temporary password is: <strong>${password}</strong></p>
                    <p>Please change your password after logging in.</p>`,
         }); 

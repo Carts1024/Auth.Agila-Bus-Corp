@@ -10,11 +10,11 @@ import { logout } from "@/app/utils/logout";
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    employeeId: '',
+    employeeNumber: '',    // <-- changed from employeeId
     password: ''
   });
   const [errors, setErrors] = useState({
-    employeeId: '',
+    employeeNumber: '',    // <-- changed from employeeId
     password: '',
     general: ''
   });
@@ -22,7 +22,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     logout();
-
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,16 +42,16 @@ export default function LoginPage() {
   const validateForm = () => {
     let valid = true;
     const newErrors = {
-      employeeId: '',
+      employeeNumber: '',    // <-- changed from employeeId
       password: '',
       general: ''
     };
 
-    if (!formData.employeeId) {
-      newErrors.employeeId = 'Employee ID is required';
+    if (!formData.employeeNumber) {
+      newErrors.employeeNumber = 'Employee Number is required';
       valid = false;
-    } else if (!/^[a-zA-Z0-9@._-]{4,20}$/.test(formData.employeeId)) {
-      newErrors.employeeId = 'Employee ID must be 4-20 characters and can contain letters, numbers, @, ., _, or -';
+    } else if (!/^[a-zA-Z0-9@._-]{4,20}$/.test(formData.employeeNumber)) {
+      newErrors.employeeNumber = 'Employee Number must be 4-20 characters and can contain letters, numbers, @, ., _, or -';
       valid = false;
     }
 
@@ -81,15 +80,13 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData),    // <-- now has employeeNumber
         credentials: 'include',
       });
 
       const data = await response.json();
       if (response.ok) {
-        // Get the role from backend response
         const role = data.role;
-        // Redirect map (from .env)
         const redirectMap: Record<string, string> = {
           'Admin': process.env.NEXT_PUBLIC_REDIRECT_HR!,
           'HR Manager': process.env.NEXT_PUBLIC_REDIRECT_HR!,
@@ -102,8 +99,8 @@ export default function LoginPage() {
         window.location.href = redirectUrl;
       } else if (response.status === 403) {
         router.push(
-          `/authentication/new-password?first=true&employeeID=${encodeURIComponent(
-            formData.employeeId
+          `/authentication/new-password?first=true&employeeNumber=${encodeURIComponent(
+            formData.employeeNumber
           )}`
         );
       } else {

@@ -9,10 +9,12 @@ import { AuthController } from './auth/auth.controller';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { EmailModule } from './email/email.module';
 import { RolesController } from './roles/roles.controller';
+import { HttpModule } from '@nestjs/axios';
 
 
 @Module({
   imports: [
+    HttpModule, // Import HttpModule to use it in AuthService
     EmailModule, // Import EmailService to use it in AuthService
     ConfigModule.forRoot({ isGlobal: true, envFilePath: 'apps/auth-ms/.env' }),
     PassportModule,
