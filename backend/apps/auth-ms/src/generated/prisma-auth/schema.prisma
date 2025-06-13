@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../src/generated/prisma-auth" // or any unique path
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  departmentID Int? // Department model from the hr db
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  users User[]
+}
+
+model SecurityQuestion {
+  id        Int      @id @default(autoincrement())
+  question  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  users User[]
+}
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  employeeId         String    @unique // employee ID from the hr db
+  email              String    @unique
+  password           String
+  roleId             Int // Foreign key to Role model
+  mustChangePassword Boolean   @default(true) // Indicates if the user must change their password on next login
+  securityQuestionId Int // Optional security question
+  securityAnswer     String // Optional security answer with arghon2 hashing
+  resetToken         String? // Reset Password Token
+  resetTokenExpiry   DateTime? // Token Expiry
+  status             String    @default("active") // User status (e.g., 'active', 'inactive', 'suspended')
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  //Relationships
+  role             Role              @relation(fields: [roleId], references: [id])
+  securityQuestion SecurityQuestion? @relation(fields: [securityQuestionId], references: [id])
+}

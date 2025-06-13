@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -47,7 +50,7 @@ export class AuthController {
     // Set the access token as an HTTP-only cookie for security.
     res.cookie('jwt', access_token, {
       httpOnly: true,
-      secure: true, // Always true in production (HTTPS)
+      secure: false, // Always true in production (HTTPS)
       sameSite: 'none', // Required for cross-site cookies
       path: '/',
       maxAge: 3600 * 1000,
@@ -111,7 +114,7 @@ export class AuthController {
     const AnswerHash = await argon2.hash(securityAns, { type: argon2.argon2id }); // Hash the security answer.
 
     const user = await prisma.user.create({
-      data: { employeeId, roleId, password: passwordhash, email, birthdate, firstName, lastName, phone, streetAddress, city, province, zipCode, country, securityQuestionId, securityAnswer: AnswerHash },
+      data: { employeeId, roleId, password: passwordhash, email, securityQuestionId, securityAnswer: AnswerHash },
     });
 
     await this.emailService.sendWelcomeEmail(user.email, user.employeeId, tempPassword, firstName); // Send welcome email with temporary password.
@@ -122,15 +125,6 @@ export class AuthController {
         employeeID: user.employeeId,
         role: user.roleId,
         email: user.email,
-        birthdate: user.birthdate,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        streetAddress: user.streetAddress,
-        city: user.city,
-        province: user.province,
-        zipCode: user.zipCode,
-        country: user.country,
         securityQuestion: user.securityQuestionId,
         securityAnswerHash: user.securityAnswer, // Note: This returns the hash
         message: 'User Registered. Email Sent'
