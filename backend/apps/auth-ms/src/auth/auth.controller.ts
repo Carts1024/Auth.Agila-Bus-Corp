@@ -76,6 +76,7 @@ export class AuthController {
       secure: true, // Always true in production (HTTPS)
       sameSite: 'lax',
       path: '/',
+      domain: process.env.COOKIE_DOMAIN, // Set the domain for the cookie
       maxAge: 3600 * 1000,
     });
     return { message: 'Login successful', token: access_token, role: role.name };
