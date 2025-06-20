@@ -6,6 +6,7 @@ import styles from './resetpassword.module.css';
 import Button from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import '@/app/globals.css'
 
 const ResetPassword = () => {
   const [email, setEmail] = useState('');

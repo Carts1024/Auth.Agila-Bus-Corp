@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import styles from './SecurityQuestions.module.css';
 import { useSecurityQuestionsLogic } from './SecurityQuestionsLogic';
 import React, { Suspense } from 'react';
+import '@/app/globals.css'
 
 function SecurityQuestionsForm() {
   const router = useRouter();

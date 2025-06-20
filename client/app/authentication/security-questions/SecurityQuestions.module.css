@@ -2,9 +2,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
   font-family: Arial, sans-serif;
   background-color: #f3f2f9;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* add vertical margin so the container “floats” with space above/below */
