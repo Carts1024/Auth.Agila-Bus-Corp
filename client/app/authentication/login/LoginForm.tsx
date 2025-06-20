@@ -2,6 +2,7 @@
 'use client';
 
 import Link from "next/link";
+import { useState } from "react";
 import styles from "./login.module.css";
 
 interface LoginFormProps {
@@ -26,15 +27,18 @@ export default function LoginForm({
   handleChange,
   handleSubmit,
 }: LoginFormProps) {
+
+  //Handle the state of the eye icon
+  const [showPassword, setShowPassword] = useState(false); 
+
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <div style={{ flex: 1 }}></div>
         <form onSubmit={handleSubmit} className={styles.form}>
           <img
-            src="/assets/images/agila logo.png"
+            src="/assets/images/agila-Logo.png"
             alt="Agila Bus Corporation Logo"
-            width={150}
+            width={200}
             height={150}
             className={styles.logo}
           />
@@ -70,16 +74,37 @@ export default function LoginForm({
           <label htmlFor="password" className={styles.label}>
             Password
           </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Password here..."
-            required
-            className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
-          />
+          <div className={styles.passwordWrapper}>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password here..."
+              required
+              className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+              style={{ paddingRight: "2.5rem" }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              style={{
+                position: "absolute",
+                right: "0.5rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0
+              }}
+              tabIndex={-1}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <i className="ri-eye-off-line"></i> : <i className="ri-eye-line"></i>}
+            </button>
+          </div>
           {errors.password && (
             <p className={styles.errorText}>
               {errors.password}
