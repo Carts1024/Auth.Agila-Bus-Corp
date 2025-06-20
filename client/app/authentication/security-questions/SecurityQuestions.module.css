@@ -9,6 +9,7 @@
 
 /* add vertical margin so the container “floats” with space above/below */
 .questionsContainer {
+  z-index: 1;
   margin: 4rem 0;          /* ← new */
   background-color: #ffffff;
   padding: 2rem;
