@@ -158,83 +158,87 @@ export class AuthController {
   // }
 
 
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  async register(@Body() body: {
-    employeeId: string,            // Employee PK (cuid)
-    roleId: number,
-    email: string,
-    securityQuestionId: number,
-    securityAnswer: string,
-    firstName: string, // For welcome email
-  }) {
-    const { employeeId, roleId, email, securityQuestionId, securityAnswer, firstName } = body;
+@Post('register')
+@HttpCode(HttpStatus.CREATED)
+async register(@Body() body: {
+  employeeId: string,            // Employee PK (cuid)
+  roleId: number,
+  email: string,
+  securityQuestionId: number,
+  securityAnswer: string,
+  firstName: string, // For welcome email
+  employeeNumber?: string // Optionally accept this, else fetch
+}) {
+  const { employeeId, roleId, email, securityQuestionId, securityAnswer, firstName, employeeNumber: empNoFromReq } = body;
 
-    // 1. Check for existing user with this employeeId or email
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { employeeId },
-          { email }
-        ]
-      }
-    });
-    if (existingUser) {
-      throw new BadRequestException('User already exists for this employee or email');
+  // 1. Check for existing user with this employeeId or email
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { employeeId },
+        { email }
+      ]
     }
-
-    // 2. Generate and hash temporary password
-    const tempPassword = generateRandomPassword();
-    const passwordHash = await argon2.hash(tempPassword, { type: argon2.argon2id });
-    const securityAnswerHash = await argon2.hash(securityAnswer ?? '', { type: argon2.argon2id });
-
-    // 3. Create user record
-    const user = await prisma.user.create({
-      data: {
-        employeeId,
-        roleId,
-        email,
-        password: passwordHash,
-        mustChangePassword: true,
-        securityQuestionId,
-        securityAnswer: securityAnswerHash,
-        status: "active",
-      }
-    });
-
-    // 4. Fetch employeeNumber from HR service using employeeId
-    let employeeNumber = '';
-    try {
-      const url = `${process.env.HR_SERVICE_URL}/employees/${employeeId}`;
-      console.log('Requesting HR:', url);
-      const hrRes = await firstValueFrom(
-        this.httpService.get(url)
-      );
-      console.log('HR employee lookup response:', hrRes.data);
-      employeeNumber = hrRes.data?.employeeNumber || '[Unknown]';
-    } catch (e) {
-      console.error('Error fetching employeeNumber:', e);
-      employeeNumber = '[Unknown]';
-    }
-
-    console.log('Sending welcome email with:', {
-      email, employeeNumber, tempPassword, firstName
-    });
-    // 5. Send welcome email with employeeNumber
-    await this.emailService.sendWelcomeEmail(email, employeeNumber, tempPassword, firstName);
-
-    return {
-      message: 'User registered successfully',
-      user: {
-        id: user.id,
-        employeeId: user.employeeId,
-        email: user.email,
-        roleId: user.roleId,
-        mustChangePassword: user.mustChangePassword,
-        status: user.status,
-      }
-    };
+  });
+  if (existingUser) {
+    throw new BadRequestException('User already exists for this employee or email');
   }
+
+  // 2. Generate and hash temporary password
+  const tempPassword = generateRandomPassword();
+  const passwordHash = await argon2.hash(tempPassword, { type: argon2.argon2id });
+  const securityAnswerHash = await argon2.hash(securityAnswer ?? '', { type: argon2.argon2id });
+
+  // 3. Create user record
+  const user = await prisma.user.create({
+    data: {
+      employeeId,
+      roleId,
+      email,
+      password: passwordHash,
+      mustChangePassword: true,
+      securityQuestionId,
+      securityAnswer: securityAnswerHash,
+      status: "active",
+    }
+  });
+
+  // 4. Fetch employee info from HR service, including position and department
+  let employeeNumber = empNoFromReq || '';
+  let positionId: number | null = null;
+  let departmentName = '';
+  try {
+    const url = `${process.env.HR_SERVICE_URL}/employees/${employeeId}`;
+    const hrRes = await firstValueFrom(this.httpService.get(url));
+    const emp = hrRes.data;
+
+    // Now emp should include .position and .position.department!
+    employeeNumber = emp?.employeeNumber || '[Unknown]';
+    positionId = emp?.position?.id || null;
+    departmentName = emp?.position?.department?.departmentName || '';
+  } catch (e) {
+    console.error('Error fetching employee info:', e);
+    employeeNumber = '[Unknown]';
+  }
+
+  // 5. Send welcome email
+  await this.emailService.sendWelcomeEmail(email, employeeNumber, tempPassword, firstName /*, departmentName */);
+
+  return {
+    message: 'User registered successfully',
+    user: {
+      id: user.id,
+      employeeId: user.employeeId,
+      email: user.email,
+      roleId: user.roleId,
+      mustChangePassword: user.mustChangePassword,
+      status: user.status,
+      employeeNumber,
+      positionId,
+      departmentName,
+    }
+  };
+}
 
   /**
    * Handles requests to initiate a password reset.

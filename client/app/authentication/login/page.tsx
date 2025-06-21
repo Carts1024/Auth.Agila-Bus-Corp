@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import LoginForm from "./LoginForm";
 import { useEffect } from "react";
 import { logout } from "@/app/utils/logout";
+import '@/app/globals.css'
 
 export default function LoginPage() {
   const router = useRouter();
