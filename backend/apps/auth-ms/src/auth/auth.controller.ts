@@ -406,7 +406,118 @@ async register(@Body() body: {
   }
 
   /**
-   * Handles requests to initiate a password reset.
+   * Initiates the password reset process by sending an email with security question token.
+   * Always returns success message for security (doesn't reveal if email exists).
+   */
+  @Post('request-password-reset')
+  @HttpCode(HttpStatus.OK)
+  async requestPasswordReset(@Body() body: { email: string }) {
+    try {
+      const user = await prisma.user.findUnique({ where: { email: body.email } });
+      
+      if (user && user.securityQuestionId && user.securityAnswer) {
+        // Generate a token for the security question step
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiry = addMinutes(new Date(), 15); // Token expiry set to 15 minutes.
+
+        // Update user with reset token and expiry
+        await prisma.user.update({
+          where: { email: body.email },
+          data: { resetToken: token, resetTokenExpiry: expiry },
+        });
+
+        // Send email with security question link (not password reset link)
+        await this.emailService.sendSecurityQuestionEmail(user.email, token);
+      }
+    } catch (error) {
+      // Log error but don't expose it to prevent email enumeration
+      console.error('Password reset request error:', error);
+    }
+
+    // Always return the same message for security
+    return { 
+      message: 'If your email is registered with us, you will receive instructions to reset your password.' 
+    };
+  }
+
+  /**
+   * Handles requests to get security question with token validation.
+   * This is the new flow: user clicks email link with token to access security question.
+   */
+  @Post('security-question-with-token')
+  @HttpCode(HttpStatus.OK)
+  async getSecurityQuestionWithToken(@Body() body: { token: string }) {
+    // Find user by non-expired reset token
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: body.token,
+        resetTokenExpiry: {
+          gt: new Date() // Token must not be expired
+        },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const question = await prisma.securityQuestion.findUnique({
+      where: { id: user.securityQuestionId ?? undefined },
+    });
+    
+    if (!question) {
+      throw new BadRequestException('Security question not found');
+    }
+
+    return { 
+      securityQuestion: question.question,
+      email: user.email // Include email for the next step
+    };
+  }
+
+  /**
+   * Validates security answer with token and redirects to password reset.
+   * This replaces the old validate-security-answer endpoint for the token flow.
+   */
+  @Post('validate-security-answer-with-token')
+  @HttpCode(HttpStatus.OK)
+  async validateSecurityAnswerWithToken(@Body() body: { 
+    token: string; 
+    answer: string 
+  }) {
+    // Find user by non-expired reset token
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: body.token,
+        resetTokenExpiry: {
+          gt: new Date()
+        },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    if (!user.securityAnswer) {
+      throw new BadRequestException('Security answer not set for this user');
+    }
+
+    const isCorrect = await argon2.verify(user.securityAnswer, body.answer);
+    if (!isCorrect) {
+      throw new UnauthorizedException('Incorrect security answer');
+    }
+
+    // Security answer is correct, user can proceed to password reset
+    // Token remains valid for the password reset step
+    return { 
+      message: 'Security answer verified. You can now reset your password.',
+      token: body.token // Return the same token for password reset
+    };
+  }
+
+  /**
+   * Handles requests to initiate a password reset (OLD FLOW - keeping for compatibility).
    * Generates a reset token and expiry, stores them for the user, and emails the token.
    */
   @Post('request-security-question')

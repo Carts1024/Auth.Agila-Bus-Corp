@@ -34,8 +34,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_BASE_URL}/auth/request-security-question`, {
+      const response = await fetch('/api/auth/request-password-reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -43,11 +42,13 @@ const ResetPassword = () => {
         body: JSON.stringify({ email })
       });
       const data = await response.json();
-      if (!response.ok) {
-        setError(data.message || 'Invalid email. Please try again.');
+      
+      if (response.ok) {
+        // Success: Show message about email being sent
+        alert('If your email is registered with us, you will receive instructions to reset your password.');
+        router.push('/authentication/login');
       } else {
-        // Success: Redirect to security answer page, pass email & question in URL
-        router.push(`/authentication/security-questions?email=${encodeURIComponent(email)}`);
+        setError(data.message || 'Something went wrong. Please try again.');
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');

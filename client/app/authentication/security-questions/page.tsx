@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './SecurityQuestions.module.css';
 import { useSecurityQuestionsLogic } from './SecurityQuestionsLogic';
 import React, { Suspense } from 'react';
@@ -8,6 +8,8 @@ import '@/app/globals.css'
 
 function SecurityQuestionsForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
   const {
     question,
     answer,
@@ -22,7 +24,12 @@ function SecurityQuestionsForm() {
     <div className={styles.base}>
       <div className={styles.questionsContainer}>
         <h1>Security Question</h1>
-        <h5>Please answer the question to proceed.</h5>
+        <h5>
+          {token 
+            ? 'Please answer your security question to reset your password.' 
+            : 'Please answer the question to proceed.'
+          }
+        </h5>
 
         <form onSubmit={handleSubmit} noValidate>
           <label className={styles.label}>Your Security Question</label>
