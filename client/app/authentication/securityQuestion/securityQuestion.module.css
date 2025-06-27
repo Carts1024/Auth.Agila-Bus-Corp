@@ -1,0 +1,126 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; 
+  background-color: #f0f2f5; 
+  padding: 1rem;
+  box-sizing: border-box; 
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 15px;
+}
+
+.description {
+  font-size: 15px;
+  color: #6b7280;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.inputField {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #374151;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #961C1E;
+  box-shadow: 0 0 0 3px rgba(150, 28, 30, 0.2); 
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+.serverError {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.serverSuccess {
+  color: #22c55e;
+  font-size: 14px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background-color: #961C1E; 
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 1rem;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #571415; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.submitButton:disabled {
+  background-color: #c9a7a8; 
+  cursor: not-allowed;
+}
+
+select.inputField {
+  appearance: none; 
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem; 
+}
