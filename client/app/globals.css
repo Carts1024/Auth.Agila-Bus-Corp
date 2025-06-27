@@ -25,115 +25,85 @@
 body {
   margin: 0;
   padding: 0;
-  height: 100vh; /* Full viewport height */
-  width: 100vw; /* Full viewport width */
-  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
   background-color: #F3F2F9;
 }
 
-.bg-image {
-  content: "";
+/* Container for background images */
+.bg-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-size: 125%;
-  animation: pan-bg 60s linear infinite;
-  z-index: 0;
-  pointer-events: none;
+  min-width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
+  z-index: -1;
 }
 
-.bg-image-1 {
-  background: url('/assets/images/buswallpaper.jpg') no-repeat 0% 50%;
-  animation: pan-bg 60s linear infinite, fade-bg-1 20s linear infinite;
+.bg-img {
+  width: 100%;
+  height: 100%;
+  min-width: 130%;
+  min-height: 140%;
+  object-fit: cover;
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  opacity: 0;
 }
 
-.bg-image-2 {
-  background: url('/assets/images/buswallpaper2.jpg') no-repeat 0% 50%;
-  animation: pan-bg 60s linear infinite, fade-bg-2 20s linear infinite;
+/* Combined pan and fade animations */
+.fade-img-1 {
+  animation: pan-image 40s ease-in-out infinite, fade-bg-1 20s linear infinite;
+}
+.fade-img-2 {
+  animation: pan-image 40s ease-in-out infinite, fade-bg-2 20s linear infinite;
+}
+.fade-img-3 {
+  animation: pan-image 40s ease-in-out infinite, fade-bg-3 20s linear infinite;
+}
+.fade-img-4 {
+  animation: pan-image 40s ease-in-out infinite, fade-bg-4 20s linear infinite;
+}
+.fade-img-5 {
+  animation: pan-image 40s ease-in-out infinite, fade-bg-5 20s linear infinite;
 }
 
-.bg-image-3 {
-  background: url('/assets/images/buswallpaper3.png') no-repeat 0% 50%;
-  animation: pan-bg 60s linear infinite, fade-bg-3 20s linear infinite;
+/* Pan animation */
+@keyframes pan-image {
+  0% { transform: translate(0%, 0%); }
+  25% { transform: translate(-5%, -5%); }
+  50% { transform: translate(-10%, 0%); }
+  75% { transform: translate(-5%, 5%); }
+  100% { transform: translate(0%, 0%); }
 }
 
-.bg-image-4 {
-  background: url('/assets/images/buswallpaper4.png') no-repeat 0% 50%;
-  animation: pan-bg 60s linear infinite, fade-bg-4 20s linear infinite;
-}
-
-.bg-image5 {
-  background: url('/assets/images/buswallpaper5.png') no-repeat 0% 50%;
-  animation: pan-bg 60s linear infinite, fade-bg-4 20s linear infinite;
-}
-
-
-/* Pan animation (same for all) */
-@keyframes pan-bg {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
-/* Fade animations for 4 images (each visible for 25% of the cycle) */
+/* Fade image visibility */
 @keyframes fade-bg-1 {
-  0%, 20% {
-    opacity: 1;
-  }
-  25%, 100% {
-    opacity: 0;
-  }
+  0%, 20% { opacity: 1; }
+  25%, 100% { opacity: 0; }
 }
-
 @keyframes fade-bg-2 {
-  0%, 20% {
-    opacity: 0;
-  }
-  25%, 45% {
-    opacity: 1;
-  }
-  50%, 100% {
-    opacity: 0;
-  }
+  0%, 20% { opacity: 0; }
+  25%, 45% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
-
 @keyframes fade-bg-3 {
-  0%, 45% {
-    opacity: 0;
-  }
-  50%, 70% {
-    opacity: 1;
-  }
-  75%, 100% {
-    opacity: 0;
-  }
+  0%, 45% { opacity: 0; }
+  50%, 70% { opacity: 1; }
+  75%, 100% { opacity: 0; }
 }
-
 @keyframes fade-bg-4 {
-  0%, 70% {
-    opacity: 0;
-  }
-  75%, 95% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+  0%, 70% { opacity: 0; }
+  75%, 95% { opacity: 1; }
+  100% { opacity: 0; }
 }
-
 @keyframes fade-bg-5 {
-  0%, 70% {
-    opacity: 0;
-  }
-  75%, 95% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+  0%, 85% { opacity: 0; }
+  90%, 100% { opacity: 1; }
 }
