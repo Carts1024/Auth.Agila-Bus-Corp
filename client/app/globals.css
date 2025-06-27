@@ -31,40 +31,46 @@ body {
   background-color: #F3F2F9;
 }
 
-
-/* First image (buswallpaper.jpg) */
-body::before {
+.bg-image {
   content: "";
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+  background-size: 125%;
+  animation: pan-bg 60s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bg-image-1 {
   background: url('/assets/images/buswallpaper.jpg') no-repeat 0% 50%;
-  background-size: 125%;
-  animation: pan-bg 60s linear infinite, fade-bg 16s linear infinite;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 1;
+  animation: pan-bg 60s linear infinite, fade-bg-1 20s linear infinite;
 }
 
-/* Second image (buswallpaper2.jpg) */
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+.bg-image-2 {
   background: url('/assets/images/buswallpaper2.jpg') no-repeat 0% 50%;
-  background-size: 125%;
-  animation: pan-bg 60s linear infinite, fade-bg-alt 16s linear infinite;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
+  animation: pan-bg 60s linear infinite, fade-bg-2 20s linear infinite;
 }
 
-/* Pan animation for both */
+.bg-image-3 {
+  background: url('/assets/images/buswallpaper3.png') no-repeat 0% 50%;
+  animation: pan-bg 60s linear infinite, fade-bg-3 20s linear infinite;
+}
+
+.bg-image-4 {
+  background: url('/assets/images/buswallpaper4.png') no-repeat 0% 50%;
+  animation: pan-bg 60s linear infinite, fade-bg-4 20s linear infinite;
+}
+
+.bg-image5 {
+  background: url('/assets/images/buswallpaper5.png') no-repeat 0% 50%;
+  animation: pan-bg 60s linear infinite, fade-bg-4 20s linear infinite;
+}
+
+
+/* Pan animation (same for all) */
 @keyframes pan-bg {
   0% {
     background-position: 0% 50%;
@@ -74,22 +80,60 @@ body::after {
   }
 }
 
-/* Fade out for ::before */
-@keyframes fade-bg {
-  0%, 45% {
+/* Fade animations for 4 images (each visible for 25% of the cycle) */
+@keyframes fade-bg-1 {
+  0%, 20% {
     opacity: 1;
   }
-  55%, 100% {
+  25%, 100% {
     opacity: 0;
   }
 }
 
-/* Fade in for ::after */
-@keyframes fade-bg-alt {
+@keyframes fade-bg-2 {
+  0%, 20% {
+    opacity: 0;
+  }
+  25%, 45% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-bg-3 {
   0%, 45% {
     opacity: 0;
   }
-  55%, 100% {
+  50%, 70% {
     opacity: 1;
+  }
+  75%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-bg-4 {
+  0%, 70% {
+    opacity: 0;
+  }
+  75%, 95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-bg-5 {
+  0%, 70% {
+    opacity: 0;
+  }
+  75%, 95% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
