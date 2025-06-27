@@ -18,7 +18,7 @@ const SecurityQuestionPage: React.FC = () => {
   } = useSecurityQuestionLogic();
 
   return (
-    <div className={styles.container}>
+    <div className={styles.base}>
       <div className={styles.card}>
         <h1 className={styles.title}>Set Security Questions</h1>
         <p className={styles.description}>Please select a security question and provide an answer. This will help us verify your identity in the future.</p>

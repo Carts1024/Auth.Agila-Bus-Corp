@@ -1,22 +1,33 @@
-.container {
+.base {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh; 
-  background-color: #f0f2f5; 
-  padding: 1rem;
-  box-sizing: border-box; 
+  height: 100vh;
+  width: 100vw;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: fixed; /* Changed from relative to fixed */
+  top: 0; /* Add this */
+  left: 0; /* Add this */
+  z-index: 1;
+  overflow: hidden; /* Add this */
 }
 
 .card {
+  z-index: 1;
+  /* Remove margin: 4rem 0; - this causes positioning issues */
   background-color: #ffffff;
-  border-radius: 12px;
-  padding: 2.5rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
+  padding: 2rem;
+  padding-top: 0.5rem;
+  border: 2px solid #961C1E;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  width: 90%;
   text-align: center;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-family: Arial, sans-serif;
   box-sizing: border-box;
 }
 
@@ -24,13 +35,13 @@
   font-size: 28px;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 15px;
+  margin-bottom: 0.5rem; /* Match h1 spacing */
 }
 
 .description {
   font-size: 15px;
   color: #6b7280;
-  margin-bottom: 25px;
+  margin-bottom: 0.5rem; /* Match h5 spacing */
   line-height: 1.5;
 }
 
@@ -41,86 +52,95 @@
 
 .label {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
-  margin-bottom: 0.5rem;
+  text-align: left; /* Keep left alignment */
+  color: gray; /* Match security-questions color */
+  font-size: 0.75rem; /* Match security-questions size */
+  margin-bottom: 0.25rem; /* Match security-questions spacing */
+  font-weight: normal; /* Remove bold */
 }
 
 .inputField {
+  padding: 0.75rem 1rem; /* Match security-questions */
+  border: 2px solid #ccc; /* Match security-questions border */
+  border-radius: 5px; /* Change from 8px to 5px */
+  outline: none;
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  transition: box-shadow 0.2s ease;
+  margin-bottom: 1.5rem; /* Match security-questions */
   font-size: 16px;
   color: #374151;
   background-color: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
 }
 
 .inputField:focus {
-  outline: none;
-  border-color: #961C1E;
-  box-shadow: 0 0 0 3px rgba(150, 28, 30, 0.2); 
+  border-color: #961C1E; /* Match security-questions */
+  box-shadow: 0 0 0 1px #961C1E; /* Match security-questions */
 }
 
 .inputError {
-  border-color: #ef4444 !important;
+  border-color: #9F0F19 !important; /* Match security-questions */
+  box-shadow: 0 0 0 1px #9F0F19 !important; /* Match security-questions */
 }
 
 .errorText {
-  color: #ef4444;
-  font-size: 13px;
-  margin-top: 0.5rem;
-  text-align: left;
+  color: #9F0F19; /* Match security-questions */
+  font-size: 0.85rem; /* Match security-questions */
+  text-align: center; /* Match security-questions */
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 1.5rem; /* Match security-questions */
 }
 
 .serverError {
-  color: #ef4444;
-  font-size: 14px;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  color: #9F0F19; /* Match security-questions */
+  font-size: 0.85rem; /* Match security-questions */
+  text-align: center;
+  width: 100%;
+  margin-bottom: 1.5rem;
   font-weight: 500;
 }
 
 .serverSuccess {
   color: #22c55e;
-  font-size: 14px;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 1.5rem;
   font-weight: 500;
 }
 
 .submitButton {
-  width: 100%;
-  padding: 0.85rem 1.5rem;
-  background-color: #961C1E; 
+  width: 60%; /* Match security-questions width */
+  padding: 0.75rem 1.5rem; /* Match security-questions */
+  background-color: #961C1E;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px; /* Match security-questions */
   font-size: 17px;
-  font-weight: 600;
+  font-weight: bold; /* Match security-questions */
+  font-family: inherit; /* Match security-questions */
   cursor: pointer;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+  margin: 0 auto; /* Center the button */
+  display: block; /* Make it block to center properly */
 }
 
 .submitButton:hover:not(:disabled) {
-  background-color: #571415; 
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #571415 !important; /* Match security-questions */
 }
 
 .submitButton:disabled {
-  background-color: #c9a7a8; 
+  background-color: #c9a7a8;
   cursor: not-allowed;
 }
 
+/* Keep the select styling the same */
 select.inputField {
-  appearance: none; 
+  appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1.25rem;
-  padding-right: 2.5rem; 
+  padding-right: 2.5rem;
 }

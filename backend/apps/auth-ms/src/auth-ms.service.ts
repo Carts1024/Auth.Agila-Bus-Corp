@@ -26,10 +26,8 @@ export class AuthService{
     const passwordMatch = await argon2.verify(user.password, password);
     if (!passwordMatch) return null;
 
-    if (user.mustChangePassword) {
-      throw new ForbiddenException('Password must be changed');
-    }
-
+    // Don't throw exception for mustChangePassword anymore
+    // Let the controller handle the flow
     const { password: pwd, ...result } = user;
     return result;
 

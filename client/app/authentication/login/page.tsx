@@ -87,6 +87,27 @@ export default function LoginPage() {
 
       const data = await response.json();
       if (response.ok) {
+        // Check if user needs to set up security question
+        if (data.requiresSecuritySetup) {
+          router.push(
+            `/authentication/security-question-setup?employeeNumber=${encodeURIComponent(
+              formData.employeeNumber
+            )}`
+          );
+          return;
+        }
+        
+        // Check if user needs to reset password (security question already set)
+        if (data.requiresPasswordReset) {
+          router.push(
+            `/authentication/new-password?mandatory=true&employeeNumber=${encodeURIComponent(
+              formData.employeeNumber
+            )}`
+          );
+          return;
+        }
+
+        // Normal successful login - redirect based on role
         const role = data.role;
         const redirectMap: Record<string, string> = {
           'Admin': process.env.NEXT_PUBLIC_REDIRECT_HR!,
@@ -99,6 +120,7 @@ export default function LoginPage() {
         const redirectUrl = redirectMap[role] || 'https://auth.agilabuscorp.me';
         window.location.href = redirectUrl;
       } else if (response.status === 403) {
+        // Fallback for old flow (if still needed)
         router.push(
           `/authentication/new-password?first=true&employeeNumber=${encodeURIComponent(
             formData.employeeNumber

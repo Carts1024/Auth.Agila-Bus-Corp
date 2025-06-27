@@ -16,6 +16,7 @@ export function useNewPasswordLogic() {
 
   const token = searchParams.get('token');
   const employeeNumber = searchParams.get('employeeNumber');
+  const isMandatory = searchParams.get('mandatory') === 'true';
 
   const validateForm = () => {
     let isValid = true;
@@ -47,13 +48,22 @@ export function useNewPasswordLogic() {
     if (!validateForm()) return;
 
     try {
-      const endpoint = token
-        ? `/auth/reset-password`
-        : `/auth/first-password-reset`;
+      let endpoint: string;
+      let payload: { token?: string; employeeNumber?: string; newPassword: string };
 
-      const payload = token
-        ? { token, newPassword }
-        : { employeeNumber, newPassword };
+      if (token) {
+        // Token-based reset (forgot password flow)
+        endpoint = `/auth/reset-password`;
+        payload = { token, newPassword };
+      } else if (isMandatory) {
+        // Mandatory reset after security question setup
+        endpoint = `/auth/mandatory-password-reset`;
+        payload = { employeeNumber: employeeNumber!, newPassword };
+      } else {
+        // First time password reset (legacy)
+        endpoint = `/auth/first-password-reset`;
+        payload = { employeeNumber: employeeNumber!, newPassword };
+      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,

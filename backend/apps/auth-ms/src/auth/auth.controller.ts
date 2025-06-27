@@ -5,7 +5,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // Imports for NestJS, DTOs, services, and utilities
-import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, Req, Res, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AuthService } from '../auth-ms.service';
 import { LoginDto } from './dto/login.dto';
 import { Request, Response } from 'express';
@@ -44,6 +44,7 @@ export class AuthController {
 
     // Step 1: Get employee by employeeNumber from HR Service
     let employee;
+    console.log('Login attempt for employee number:', loginDto.employeeNumber);
     try {
       const hrRes = await firstValueFrom(
         this.httpService.get(`${this.HR_SERVICE_URL}/employees/by-number/${loginDto.employeeNumber}`)
@@ -64,6 +65,27 @@ export class AuthController {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Check if user must change password (new user flow)
+    if (user.mustChangePassword) {
+      // Check if security question is already set up
+      if (!user.securityQuestionId || !user.securityAnswer) {
+        return {
+          message: 'Security question setup required',
+          requiresSecuritySetup: true,
+          employeeNumber: loginDto.employeeNumber,
+          nextStep: 'security-question-setup'
+        };
+      } else {
+        return {
+          message: 'Password reset required',
+          requiresPasswordReset: true,
+          employeeNumber: loginDto.employeeNumber,
+          nextStep: 'mandatory-password-reset'
+        };
+      }
+    }
+
     const role = await this.authService.getRole(user);
     if (!role) {
       throw new BadRequestException('Role not found for user');
@@ -164,12 +186,10 @@ async register(@Body() body: {
   employeeId: string,            // Employee PK (cuid)
   roleId: number,
   email: string,
-  securityQuestionId: number,
-  securityAnswer: string,
   firstName: string, // For welcome email
   employeeNumber?: string // Optionally accept this, else fetch
 }) {
-  const { employeeId, roleId, email, securityQuestionId, securityAnswer, firstName, employeeNumber: empNoFromReq } = body;
+  const { employeeId, roleId, email, firstName, employeeNumber: empNoFromReq } = body;
 
   // 1. Check for existing user with this employeeId or email
   const existingUser = await prisma.user.findFirst({
@@ -187,7 +207,7 @@ async register(@Body() body: {
   // 2. Generate and hash temporary password
   const tempPassword = generateRandomPassword();
   const passwordHash = await argon2.hash(tempPassword, { type: argon2.argon2id });
-  const securityAnswerHash = await argon2.hash(securityAnswer ?? '', { type: argon2.argon2id });
+  // const securityAnswerHash = await argon2.hash(securityAnswer ?? '', { type: argon2.argon2id });
 
   // 3. Create user record
   const user = await prisma.user.create({
@@ -197,8 +217,8 @@ async register(@Body() body: {
       email,
       password: passwordHash,
       mustChangePassword: true,
-      securityQuestionId,
-      securityAnswer: securityAnswerHash,
+      // securityQuestionId,
+      // securityAnswer: securityAnswerHash,
       status: "active",
     }
   });
@@ -241,6 +261,151 @@ async register(@Body() body: {
 }
 
   /**
+   * Sets up security question and answer for a user who must change their password.
+   * This is part of the mandatory setup flow for new users.
+   */
+  @Post('setup-security-question')
+  @HttpCode(HttpStatus.OK)
+  async setupSecurityQuestion(@Body() body: { 
+    employeeNumber: string; 
+    securityQuestionId: number; 
+    securityAnswer: string 
+  }) {
+    const { employeeNumber, securityQuestionId, securityAnswer } = body;
+
+    // 1. Lookup the employee by number (HR Service)
+    let employeeId: string | undefined;
+    try {
+      const hrRes = await firstValueFrom(
+        this.httpService.get(`${process.env.HR_SERVICE_URL}/employees/by-number/${employeeNumber}`)
+      );
+      employeeId = hrRes.data.id;
+    } catch {
+      throw new BadRequestException('Invalid employee number');
+    }
+
+    if (!employeeId) {
+      throw new BadRequestException('Employee not found');
+    }
+
+    // 2. Find the user in Auth DB
+    const user = await prisma.user.findUnique({
+      where: { employeeId },
+    });
+    if (!user) {
+      throw new BadRequestException('No such user');
+    }
+
+    if (!user.mustChangePassword) {
+      throw new BadRequestException('Security question setup not required');
+    }
+
+    // 3. Verify the security question exists
+    const securityQuestion = await prisma.securityQuestion.findUnique({
+      where: { id: securityQuestionId },
+    });
+    if (!securityQuestion) {
+      throw new BadRequestException('Invalid security question');
+    }
+
+    // 4. Hash the security answer and update user
+    const securityAnswerHash = await argon2.hash(securityAnswer, { type: argon2.argon2id });
+    
+    await prisma.user.update({
+      where: { employeeId },
+      data: {
+        securityQuestionId,
+        securityAnswer: securityAnswerHash,
+      },
+    });
+
+    return { 
+      message: 'Security question setup completed successfully',
+      nextStep: 'password-reset' // Indicates the next required step
+    };
+  }
+
+  /**
+   * Handles the mandatory password reset for new users after security question setup.
+   * Updates the password and sets `mustChangePassword` to false.
+   */
+  @Post('mandatory-password-reset')
+  @HttpCode(HttpStatus.OK)
+  async mandatoryPasswordReset(@Body() body: { 
+    employeeNumber: string; 
+    newPassword: string 
+  }) {
+    const { employeeNumber, newPassword } = body;
+
+    // 1. Lookup the employee by number (HR Service)
+    let employeeId: string | undefined;
+    try {
+      const hrRes = await firstValueFrom(
+        this.httpService.get(`${process.env.HR_SERVICE_URL}/employees/by-number/${employeeNumber}`)
+      );
+      employeeId = hrRes.data.id;
+    } catch {
+      throw new BadRequestException('Invalid employee number');
+    }
+
+    if (!employeeId) {
+      throw new BadRequestException('Employee not found');
+    }
+
+    // 2. Find the user in Auth DB
+    const user = await prisma.user.findUnique({
+      where: { employeeId },
+    });
+    if (!user) {
+      throw new BadRequestException('No such user');
+    }
+
+    if (!user.mustChangePassword) {
+      throw new BadRequestException('Password reset not required or already completed');
+    }
+
+    // 3. Verify security question is set up
+    if (!user.securityQuestionId || !user.securityAnswer) {
+      throw new BadRequestException('Security question must be set up first');
+    }
+
+    // 4. Hash and update password
+    const hash = await argon2.hash(newPassword, { type: argon2.argon2id });
+    await prisma.user.update({
+      where: { employeeId },
+      data: {
+        password: hash,
+        mustChangePassword: false,
+      },
+    });
+
+    return { 
+      message: 'Password reset successfully. You can now login with your new credentials.',
+      redirectTo: 'login' // Indicates where the frontend should redirect
+    };
+  }
+
+  /**
+   * Fetches all available security questions.
+   * This endpoint allows users to select from available security questions.
+   */
+  @Get('security-questions')
+  @HttpCode(HttpStatus.OK)
+  async getSecurityQuestions() {
+    const questions = await prisma.securityQuestion.findMany({
+      select: {
+        id: true,
+        question: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    return { securityQuestions: questions };
+  }
+
+  /**
    * Handles requests to initiate a password reset.
    * Generates a reset token and expiry, stores them for the user, and emails the token.
    */
@@ -253,7 +418,7 @@ async register(@Body() body: {
     }
 
     const question = await prisma.securityQuestion.findUnique({
-      where: { id: user.securityQuestionId },
+      where: { id: user.securityQuestionId ?? undefined },
     });
     if (!question) throw new BadRequestException('Security question not found');
     return {securityQuestion: question.question}; // Return the security question for the user to answer.
@@ -387,5 +552,15 @@ async register(@Body() body: {
       sameSite: 'strict',
     });
     return { message: 'Logged out successfully' };
+  }
+
+  @Get('users')
+  @HttpCode(HttpStatus.OK)
+  async getAllUsers() {
+    const users = await prisma.user.findMany({
+      orderBy: { id: 'asc' }
+      // No select = all fields will be returned
+    });
+    return { users };
   }
 }

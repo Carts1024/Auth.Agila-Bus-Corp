@@ -28,18 +28,25 @@ function NewPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isFirstTime = searchParams.get('first') === 'true';
+  const isMandatory = searchParams.get('mandatory') === 'true';
+
+  const getTitle = () => {
+    if (isMandatory) return 'Complete Your Setup';
+    if (isFirstTime) return 'Set Your Password';
+    return 'Reset Your Password';
+  };
+
+  const getSubtitle = () => {
+    if (isMandatory) return 'Almost done! Please set your new password to complete the setup process.';
+    if (isFirstTime) return 'Welcome! Please set your password for your first login.';
+    return 'Please enter and confirm your new password.';
+  };
 
   return (
     <div className={styles.base}>
       <div className={styles.resetContainer}>
-        <h1>
-          {isFirstTime ? 'Set Your Password' : 'Reset Your Password'}
-        </h1>
-        <h5>
-          {isFirstTime
-            ? 'Welcome! Please set your password for your first login.'
-            : 'Please enter and confirm your new password.'}
-        </h5>
+        <h1>{getTitle()}</h1>
+        <h5>{getSubtitle()}</h5>
         <br /><br />
 
         <form onSubmit={handleSubmit} noValidate>
