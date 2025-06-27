@@ -14,11 +14,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {/* Background images */}
-        <div className="bg-image bg-image-1"></div>
-        <div className="bg-image bg-image-2"></div>
-        <div className="bg-image bg-image-3"></div>
-        <div className="bg-image bg-image-4"></div>
-        <div className="bg-image bg-image-5"></div>
+        <div className="bg-wrapper">
+          <img src="/assets/images/buswallpaper.jpg" className="bg-img fade-img-1" />
+          <img src="/assets/images/buswallpaper2.jpg" className="bg-img fade-img-2" />
+          <img src="/assets/images/buswallpaper3.png" className="bg-img fade-img-3" />
+          <img src="/assets/images/buswallpaper4.png" className="bg-img fade-img-4" />
+          <img src="/assets/images/buswallpaper5.png" className="bg-img fade-img-5" />
+        </div>
 
         {children}
       </body>
