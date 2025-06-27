@@ -13,6 +13,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
       </head>
       <body>
+        {/* Background images */}
+        <div className="bg-image bg-image-1"></div>
+        <div className="bg-image bg-image-2"></div>
+        <div className="bg-image bg-image-3"></div>
+        <div className="bg-image bg-image-4"></div>
+        <div className="bg-image bg-image-5"></div>
+
         {children}
       </body>
     </html>
