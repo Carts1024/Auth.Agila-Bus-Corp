@@ -5,7 +5,7 @@ const GATEWAY_URL = process.env.NEXT_PUBLIC_API_URL!;
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  const gatewayRes = await fetch(`${GATEWAY_URL}/auth/request-password-reset`, {
+  const gatewayRes = await fetch(`${GATEWAY_URL}/auth/request-security-question`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
